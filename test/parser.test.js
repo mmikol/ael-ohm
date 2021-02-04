@@ -36,7 +36,6 @@ const source2 = `let one = 5 % 4
   print(5 % 4 % 3 % 2 % 1)
   print(-5 ** (-4 ** 3 ** 2 ** 1))`
 
-
 const expectedAst2 = `   1 | program: Program
    2 |   statements[0]: Declaration name='one'
    3 |     initializer: BinaryExpression op='%'
