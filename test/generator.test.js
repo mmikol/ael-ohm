@@ -15,7 +15,7 @@ const smallFixture = {
   name: "small",
   source: `
     let x = 3.1
-    x = 5 * sqrt x / -x + x - abs x
+    x = 5 * sqrt x / (-x) + x - abs x
     print x
   `,
   expected: {

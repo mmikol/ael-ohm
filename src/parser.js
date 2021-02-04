@@ -11,14 +11,19 @@ const aelGrammar = ohm.grammar(String.raw`Ael {
   Statement = let id "=" Exp                  --declare
             | id "=" Exp                      --assign
             | print Exp                       --print
-  Exp       = Exp ("+" | "-") Term            --binary
+  Exp       = Exp "==" Exp1                   --binary
+  			    | Exp1        
+  Exp1      = Exp1 ("+" | "-") Term           --binary
             | Term
-  Term      = Term ("*"| "/") Factor          --binary
+  Term      = Term ("*"| "/" | "%") Factor    --binary
+            | ("-")? Term                     --unary
             | Factor
-  Factor    = id
+  Factor    = Primary "**" Factor             --binary
+  			    | Primary
+  Primary   = id
             | num
             | "(" Exp ")"                     --parens
-            | ("-" | abs | sqrt) Factor       --unary
+            | (abs | sqrt) Factor             --unary
   num       = digit+ ("." digit+)?
   let       = "let" ~alnum
   print     = "print" ~alnum
@@ -48,14 +53,23 @@ const astBuilder = aelGrammar.createSemantics().addOperation("ast", {
   Exp_binary(left, op, right) {
     return new ast.BinaryExpression(op.sourceString, left.ast(), right.ast())
   },
+  Exp1_binary(left, op, right) {
+    return new ast.BinaryExpression(op.sourceString, left.ast(), right.ast())
+  },
   Term_binary(left, op, right) {
     return new ast.BinaryExpression(op.sourceString, left.ast(), right.ast())
   },
-  Factor_unary(op, operand) {
+  Term_unary(op, operand) {
     return new ast.UnaryExpression(op.sourceString, operand.ast())
   },
-  Factor_parens(_open, expression, _close) {
+  Factor_binary(left, op, right) {
+    return new ast.BinaryExpression(op.sourceString, left.ast(), right.ast())
+  },
+  Primary_parens(_open, expression, _close) {
     return expression.ast()
+  },
+  Primary_unary(op, operand) {
+    return new ast.UnaryExpression(op.sourceString, operand.ast())
   },
   num(_base, _radix, _fraction) {
     return new ast.LiteralExpression(+this.sourceString)
